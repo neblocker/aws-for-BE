@@ -1,16 +1,20 @@
-import type { ValidatedEventAPIGatewayProxyEvent } from "@libs/api-gateway"
-import { formatJSONResponse } from "@libs/api-gateway"
+import { APIGatewayProxyResult } from "aws-lambda"
+import { getSingleProduct } from "src/services/getSingleProduct"
 
-import { getProductDetails } from "src/database/handler"
-import { Product } from "src/database"
+export const getProductById = async (event): Promise<APIGatewayProxyResult> => {
+  try {
+    const { productId } = event.pathParameters
 
-export const getProductById: ValidatedEventAPIGatewayProxyEvent<
-  Product
-> = async (event) => {
-  const { productId } = event.pathParameters
+    console.log("product id", productId)
 
-  return formatJSONResponse({
-    status: 200,
-    data: await getProductDetails(productId)
-  })
+    return {
+      statusCode: 200,
+      body: JSON.stringify(await getSingleProduct(productId))
+    }
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "[Internal Server Error.]" })
+    }
+  }
 }
